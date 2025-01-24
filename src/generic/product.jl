@@ -194,7 +194,7 @@ end
 
 TupleProductMap{T}(maps::Vector) where {T<:Tuple} = TupleProductMap{T}(maps...)
 TupleProductMap{T}(maps...) where {T<:Tuple} = TupleProductMap{T}(maps)
-function TupleProductMap{T}(maps::NTuple{N,<:AbstractMap}) where {N,T <: Tuple}
+function TupleProductMap{T}(maps::NTuple{N,<:Map}) where {N,T <: Tuple}
 	Tmaps = map((t,d) -> convert(Map{t},d), tuple(T.parameters...), maps)
 	TupleProductMap{T,typeof(Tmaps)}(Tmaps)
 end

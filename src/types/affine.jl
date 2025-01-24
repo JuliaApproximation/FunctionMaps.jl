@@ -48,7 +48,7 @@ function diffvolume(m::AbstractAffineMap{T}) where T
     ConstantMap{T}(c)
 end
 
-islinearmap(m::AbstractMap) = false
+islinearmap(m::Map) = false
 islinearmap(m::AbstractAffineMap) = _affine_islinearmap(m, unsafe_vector(m))
 _affine_islinearmap(m, b) = all(b .== 0)
 

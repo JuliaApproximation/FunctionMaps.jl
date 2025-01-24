@@ -91,7 +91,7 @@ abstract type ConstantMap{T,U} <: TypedMap{T,U} end
 
 applymap(m::ConstantMap, x) = mapconstant(m)
 
-isconstantmap(m::AbstractMap) = false
+isconstantmap(m::Map) = false
 isconstantmap(m::ConstantMap) = true
 
 isrealmap(m::ConstantMap{T,U}) where {T,U} =

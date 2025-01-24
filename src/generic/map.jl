@@ -1,14 +1,16 @@
 
-"An `AbstractMap` represents a function `y=f(x)` of a single variable."
-abstract type AbstractMap end
-
-"A `Map{T}` is a map of a single variable of type `T`."
-abstract type Map{T} <: AbstractMap end
+"""
+A `Map{T}` is a map of a single variable of type `T`.
+"""
+abstract type Map{T} end
 
 Map(m) = convert(Map, m)
 Map{T}(m) where {T} = convert(Map{T}, m)
 
-"A `TypedMap{T,U}` maps a variable of type `T` to a variable of type `U`."
+"""
+Any instance of `TypedMap{T,U}` maps a variable of type `T` to a variable
+of type `U`.
+"""
 abstract type TypedMap{T,U} <: Map{T} end
 
 const EuclideanMap{N,T} = Map{<:StaticVector{N,T}}
@@ -43,7 +45,6 @@ numtype(::Type{<:Map{T}}) where T = numtype(T)
 isrealmap(m) = isrealtype(domaintype(m)) && isrealtype(codomaintype(m))
 isrealmap(::UniformScaling{T}) where {T} = isrealtype(T)
 
-convert(::Type{AbstractMap}, m::AbstractMap) = m
 convert(::Type{Map{T}}, m::Map{T}) where {T} = m
 convert(::Type{Map{T}}, m::Map{S}) where {S,T} = similarmap(m, T)
 convert(::Type{TypedMap{T,U}}, m::TypedMap{T,U}) where {T,U} = m
@@ -83,10 +84,10 @@ convert_codomaintype(::Type{Any}, map) = map
 
 
 # Users may call a map, concrete subtypes specialize the `applymap` function
-(m::AbstractMap)(x) = applymap(m, x)
-
-# For Map{T}, we allow invocation with multiple arguments by conversion to T
+# Some effort is spent at this generic level to convert the argument to something
+# of type `T`.
 (m::Map{T})(x) where {T} = promote_and_apply(m, x)
+# For convenience we allow invocation with multiple arguments by conversion to T
 (m::Map{T})(x...) where {T} = promote_and_apply(m, convert(T, x))
 
 "Promote map and point to compatible types."
@@ -115,9 +116,8 @@ promote_and_apply(m::Map, x) = applymap(promote_map_point_pair(m,x)...)
 
 applymap!(y, m, x) = y .= m(x)
 
-# Fallback for functions that are not of type AbstractMap
+# Fallback for functions that are not of type Map
 applymap(m, x) = m(x)
-applymap(m::AbstractMap, x) = error("Please implement applymap for map $(m)")
 
 
 "Can the maps be promoted to a common domain type without throwing an error?"
