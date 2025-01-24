@@ -13,5 +13,14 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+	    "Examples" => "examples.md",
+        "API" => Any[
+            "Public API Reference" => "api.md",
+            "Internal API Reference" => "internal.md"
+        ],
     ],
+)
+
+deploydocs(;
+    repo="github.com/JuliaApproximation/FunctionMaps.jl", devbranch="master",
 )

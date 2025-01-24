@@ -4,11 +4,8 @@ CurrentModule = FunctionMaps
 
 # FunctionMaps
 
-Documentation for [FunctionMaps](https://github.com/daanhb/FunctionMaps.jl).
+This is the documentation for [FunctionMaps](https://github.com/JuliaApproximation/FunctionMaps.jl).
 
-```@index
-```
+## What is FunctionMaps.jl
 
-```@autodocs
-Modules = [FunctionMaps]
-```
+FunctionMaps.jl is a package designed to represent scalar- and vector-valued functions. It makes it easy to make new maps from existing ones, via composition or by taking products.
