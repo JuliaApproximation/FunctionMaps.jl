@@ -20,8 +20,8 @@ inverse(m::IdentityMap, x) = x
 islinearmap(::IdentityMap) = true
 isrealmap(::IdentityMap{T}) where {T} = isrealtype(T)
 
+isidentitymap(m) = false
 isidentitymap(::IdentityMap) = true
-isidentitymap(m::Map{T}) where {T} = m == StaticIdentityMap{T}()
 
 mapsize(m::IdentityMap{T}) where {T<:Number} = ()
 mapsize(m::IdentityMap{T}) where {T} = (euclideandimension(T),euclideandimension(T))

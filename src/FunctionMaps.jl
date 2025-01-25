@@ -27,13 +27,16 @@ export canonicalmap
 # from generic/composite.jl
 export composedmap
 # from generic/product.jl
-export productmap
+export ProductMap, productmap
 
 # from concrete/basic.jl
 export IdentityMap,
-    StaticIdentityMap, VectorIdentityMap,
-    ZeroMap, UnityMap, ConstantMap,
-    isconstantmap, mapconstant
+    ZeroMap,
+    UnityMap,
+    ConstantMap,
+    isconstantmap,
+    mapconstant,
+    isidentitymap
 # from concrete/affine
 export AffineMap, Translation, LinearMap,
     affinematrix, affinevector,
