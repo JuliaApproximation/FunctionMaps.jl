@@ -22,5 +22,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/JuliaApproximation/FunctionMaps.jl.git", devbranch="master",
+    repo="github.com/JuliaApproximation/FunctionMaps.jl.git", devbranch="main",
 )

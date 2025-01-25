@@ -31,6 +31,8 @@ MapStyle(::Type{<:Map}) = IsMap()
     functionmap(m)
 
 Return a map associated with the object `m`.
+
+The result need not have type `Map`, but its `MapStyle` is `IsMap`.
 """
 functionmap(m::Map) = m
 

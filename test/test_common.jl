@@ -84,6 +84,15 @@ function test_numtype()
     @test promote_numtype(2, 3.0+im, big(4)) isa Tuple{Complex{BigFloat},Complex{BigFloat},Complex{BigFloat}}
 end
 
+using FunctionMaps: isrealtype
+
+function test_realtype()
+    @test isrealtype(Any) == false
+    @test isrealtype(Int) == true
+    @test isrealtype(ComplexF64) == false
+    @test isrealtype(Matrix{Float64}) == true
+end
+
 @testset "common functionality" begin
     @testset "dimension" begin
         test_dimension()
@@ -94,4 +103,6 @@ end
     @testset "numtype" begin
         test_numtype()
     end
+
+    test_realtype()
 end
