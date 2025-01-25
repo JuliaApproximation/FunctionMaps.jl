@@ -117,7 +117,7 @@ end
 const NumberLike = Union{Number,UniformScaling}
 
 """
-    to_matrix(::Type{T}, A[, b])
+    to_matrix(T, A[, b])
 
 Convert the `A` in the affine map `A*x` or `A*x+b` with domaintype `T` to a matrix.
 """

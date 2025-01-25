@@ -1,10 +1,14 @@
 
 """
+    AbstractAffineMap{T} <: Map{T}
+
 An affine map has the general form `y = A*x + b`.
 
-We use `affinematrix(m)` and `affinevector(m)` to denote `A` and `b` respectively. Concrete
-subtypes include linear maps of the form `y = A*x` and translations of the
-form `y = x + b`.
+We use `affinematrix(m)` and `affinevector(m)` to denote `A` and `b`
+respectively. Concrete subtypes include linear maps of the form `y = A*x`
+and translations of the form `y = x + b`.
+
+See also: [`affinematrix`](@ref), [`affinevector`](@ref).
 """
 abstract type AbstractAffineMap{T} <: Map{T} end
 
@@ -27,11 +31,8 @@ function _affine_applymap!(y, m, x, A, b)
     y
 end
 
-_affine_A_isreal(A) = isreal(A)
-_affine_A_isreal(::UniformScaling{T}) where T = isrealtype(T)
-
 isrealmap(m::AbstractAffineMap) = _affine_isrealmap(m, unsafe_matrix(m), unsafe_vector(m))
-_affine_isrealmap(m, A, b) = _affine_A_isreal(A) && isreal(b)
+_affine_isrealmap(m, A, b) = isrealmap(A) && isreal(b)
 
 jacobian(m::AbstractAffineMap{T}) where {T} = ConstantMap{T}(affinematrix(m))
 jacobian(m::AbstractAffineMap, x) = affinematrix(m)
@@ -48,10 +49,24 @@ function diffvolume(m::AbstractAffineMap{T}) where T
     ConstantMap{T}(c)
 end
 
-islinearmap(m::Map) = false
+"""
+    islinearmap(m)
+
+Is `m` a linear map?
+"""
+islinearmap(m) = false
 islinearmap(m::AbstractAffineMap) = _affine_islinearmap(m, unsafe_vector(m))
 _affine_islinearmap(m, b) = all(b .== 0)
 
+"""
+    isaffinemap(m)
+
+Is `m` an affine map?
+
+If `m` is affine, then it has the form `m(x) = A*x+b`.
+
+See also: [`affinematrix`](@ref), [`affinevector`](@ref).
+"""
 isaffinemap(m) = false
 isaffinemap(m::Map) = islinearmap(m) || isconstantmap(m)
 isaffinemap(m::AbstractAffineMap) = true
@@ -94,7 +109,10 @@ map_stencil_parentheses(m::AbstractAffineMap) = true
 ########################
 
 """
+    LinearMap{T} <: AbstractAffineMap{T}
+
 The supertype of all linear maps `y = A*x`.
+
 Concrete subtypes may differ in how `A` is represented.
 """
 abstract type LinearMap{T} <: AbstractAffineMap{T} end
@@ -232,9 +250,6 @@ leftinverse(m::GenericLinearMap{T,AA}) where {T<:AbstractVector,AA<:Number} =
     LinearMap{T}(inv(m.A))
 rightinverse(m::GenericLinearMap{T,AA}) where {T<:AbstractVector,AA<:Number} =
     LinearMap{T}(inv(m.A))
-
-convert(::Type{Map}, A::UniformScaling) = GenericLinearMap{Vector{Any}}(A)
-convert(::Type{Map{T}}, A::UniformScaling) where {T} = GenericLinearMap{T}(A)
 
 "A `ScalarLinearMap` is a linear map `y = A*x` for scalars."
 struct ScalarLinearMap{T} <: LinearMap{T}
@@ -409,11 +424,25 @@ GenericTranslation{T}(b::Number) where {T<:Number} =
 
 
 """
-The supertype of all affine maps that store `A` and `b`.
+    AffineMap{T} <: AbstractAffineMap{T}
+
+    The supertype of all affine maps that store `A` and `b`.
 Concrete subtypes differ in how `A` and `b` are represented.
 """
 abstract type AffineMap{T} <: AbstractAffineMap{T} end
 
+"""
+    AffineMap(A, b)
+
+Return an affine map with an appropriate concrete type depending on the arguments
+`A` and `b`.
+
+# Examples
+```julia
+julia> AffineMap(2, 3)
+x -> 2 * x + 3
+```
+"""
 AffineMap(A::Number, b::Number) = ScalarAffineMap(A, b)
 AffineMap(A::StaticMatrix, b::StaticVector) = StaticAffineMap(A, b)
 AffineMap(A::Matrix, b::Vector) = VectorAffineMap(A, b)
@@ -587,3 +616,18 @@ StaticAffineMap{T,N,M}(A::AbstractMatrix, b::AbstractVector) where {T,N,M} =
 
 convert(::Type{Map{SVector{N,T}}}, m::VectorAffineMap) where {N,T} =
     StaticAffineMap{T,N}(m.A, m.b)
+
+
+###########################
+# Uniform scaling as a map
+###########################
+
+convert(::Type{Map}, A::UniformScaling) = GenericLinearMap{Vector{Any}}(A)
+convert(::Type{Map{T}}, A::UniformScaling) where {T} = GenericLinearMap{T}(A)
+
+# I(4) returns a diagonal matrix: the action of I is multiplication
+applymap(I::UniformScaling, x) = I*x
+domaintype(::UniformScaling{T}) where T = T
+islinearmap(::UniformScaling) = true
+affinematrix(I::UniformScaling) = I
+affinevector(I::UniformScaling) = zerovector(I)

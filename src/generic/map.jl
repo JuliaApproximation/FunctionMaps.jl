@@ -30,7 +30,9 @@ domaintype(::Type{<:Map{T}}) where {T} = T
 """
     codomaintype(m[, T])
 
-What is the codomain type of the function map `m`, given that `T` is its domain type?
+What is the type of a point in the codomain of the function map `m`?
+    
+The second argument optionally specifies a domain type `T`.
 """
 codomaintype(m) = codomaintype(m, domaintype(m))
 codomaintype(m, ::Type{T}) where {T} = _codomaintype(typeof(m), T)
@@ -42,14 +44,27 @@ _codomaintype(M::Type{<:TypedMap{T,U}}, ::Type{Any}) where {T,U} = U
 prectype(::Type{<:Map{T}}) where T = prectype(T)
 numtype(::Type{<:Map{T}}) where T = numtype(T)
 
+"""
+    isrealmap(m)
+
+Is the map real-valued?
+
+A map is real-valued if both its domain and codomain types are real.
+"""
 isrealmap(m) = isrealtype(domaintype(m)) && isrealtype(codomaintype(m))
-isrealmap(::UniformScaling{T}) where {T} = isrealtype(T)
 
 convert(::Type{Map{T}}, m::Map{T}) where {T} = m
 convert(::Type{Map{T}}, m::Map{S}) where {S,T} = similarmap(m, T)
 convert(::Type{TypedMap{T,U}}, m::TypedMap{T,U}) where {T,U} = m
 convert(::Type{TypedMap{T,U}}, m::TypedMap) where {T,U} = similarmap(m, T, U)
 
+"""
+    convert_domaintype(T, m)
+
+Convert the given map to a map such that its `domaintype` is `T`.
+
+See also: [`domaintype`](@ref).
+"""
 convert_domaintype(::Type{T}, map::Map{T}) where {T} = map
 convert_domaintype(::Type{U}, map::Map{T}) where {T,U} = convert(Map{U}, map)
 convert_domaintype(::Type{Any}, map) = map
