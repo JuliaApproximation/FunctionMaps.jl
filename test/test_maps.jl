@@ -1,7 +1,7 @@
 
 maps_to_test(T) = [
-    StaticIdentityMap{T}(),
-    VectorIdentityMap{T}(10),
+    IdentityMap{T}(),
+    IdentityMap{Vector{T}}(10),
     ConstantMap{T}(one(T)),
     ConstantMap{T}(SVector{2,T}(1,2)),
     ZeroMap{T}(),
@@ -108,7 +108,7 @@ function test_composite_map(T)
     b = T(1)
     c = T(2)
     d = T(3)
-    ma = StaticIdentityMap{T}()
+    ma = IdentityMap{T}()
     mb = interval_map(a, b, c, d)
 
     r = suitable_point_to_map(ma)

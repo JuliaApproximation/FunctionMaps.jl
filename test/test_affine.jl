@@ -50,7 +50,7 @@ function test_linearmap(T)
     @test mw1.A isa widen(T)
     @test jacobian(m1) isa ConstantMap{T}
     @test jacobian(m1, 1) == 2
-    @test LinearMap(one(T)) == StaticIdentityMap{T}()
+    @test LinearMap(one(T)) == IdentityMap{T}()
 
     m2 = LinearMap(2)
     @test domaintype(m2) == Int
@@ -60,7 +60,7 @@ function test_linearmap(T)
     @test jacobian(m2, 1) == 2
     @test jacobian(m2) isa ConstantMap{Int}
     @test jacobian(m2, 1) == 2
-    @test LinearMap(1) == StaticIdentityMap{T}()
+    @test LinearMap(1) == IdentityMap{T}()
 
     m3 = LinearMap(SMatrix{2,2}(one(T), 2one(T), 3one(T), 4one(T)))
     @test m3 isa LinearMap{SVector{2,T}}
@@ -68,7 +68,7 @@ function test_linearmap(T)
     @test m3(SVector(1,2)) == SVector(7, 10)
     @test m3(SVector{2,T}(1,2)) == SVector{2,T}(7, 10)
     @test m3 ∘ m3 isa LinearMap
-    @test LinearMap(SA[1 0; 0 1]) == StaticIdentityMap{domaintype(m3)}()
+    @test LinearMap(SA[1 0; 0 1]) == IdentityMap{domaintype(m3)}()
 
     A = rand(T,2,2)
     m4 = LinearMap(A)

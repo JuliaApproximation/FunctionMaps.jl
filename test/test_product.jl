@@ -1,5 +1,5 @@
 function test_product_map(T)
-    ma = StaticIdentityMap{T}()
+    ma = IdentityMap{T}()
     mb = interval_map(T(0), T(1), T(2), T(3))
 
     r1 = suitable_point_to_map(ma)

@@ -58,15 +58,17 @@ function test_scaling_maps(T)
 end
 
 function test_identity_map(T)
-    i1 = StaticIdentityMap{T}()
-    i2 = StaticIdentityMap{SVector{2,T}}()
+    i1 = IdentityMap{T}()
+    @test i1 isa FunctionMaps.StaticIdentityMap
+    i2 = IdentityMap{SVector{2,T}}()
+    @test i2 isa FunctionMaps.StaticIdentityMap
     test_generic_map(i1)
     test_generic_map(i2)
     @test i1 == i2
     @test hash(i1) == hash(i2)
     @test islinearmap(i1)
     @test isaffinemap(i1)
-    @test convert(StaticIdentityMap{SVector{2,T}}, i1) === i2
+    @test convert(FunctionMaps.StaticIdentityMap{SVector{2,T}}, i1) === i2
     @test jacobian(i1) isa ConstantMap
     @test jacobian(i1, 1) == 1
     @test jacdet(i1, 1) == 1
@@ -78,13 +80,19 @@ function test_identity_map(T)
     @test m2 isa LinearMap{T}
     @test jacdet(m2, 1) == 1
 
-    i3 = VectorIdentityMap{T}(10)
+    i3 = IdentityMap{Vector{T}}(10)
+    @test i3 isa FunctionMaps.VectorIdentityMap
     test_generic_map(i3)
     r = rand(T, 10)
     @test i3(r) ≈ r
-    @test hash(i3) == hash(VectorIdentityMap{Int}(10))
+    @test hash(i3) == hash(IdentityMap{Vector{Int}}(10))
 
     @test IdentityMap() ∘ LinearMap(2) == LinearMap(2.0)
+
+    @test_throws ArgumentError IdentityMap{Float64}(10)
+    @test_throws ArgumentError IdentityMap{Float64}(Val(2))
+    @test IdentityMap{Float64}(1) isa Map
+    @test IdentityMap{Float64}(Val(1)) isa Map
 end
 
 function test_basic_maps(T)

@@ -7,7 +7,7 @@ IdentityMap() = StaticIdentityMap()
 IdentityMap(::Val{N}) where {N} = StaticIdentityMap(Val(N))
 
 IdentityMap{T}(n::Int) where {T} = DynamicIdentityMap{T}(n)
-IdentityMap{T}(n::Int) where {T<:StaticTypes} = StaticIdentityMap{T}()
+IdentityMap{T}(n::Int) where {T<:StaticTypes} = StaticIdentityMap{T}(n)
 IdentityMap{T}(::Val{N}) where {N,T} = StaticIdentityMap{T}(Val(N))
 IdentityMap{T}() where {T} = StaticIdentityMap{T}()
 
@@ -50,10 +50,14 @@ end
 StaticIdentityMap() = StaticIdentityMap{Float64}()
 StaticIdentityMap(::Val{N}) where {N} = StaticIdentityMap{SVector{N,Float64}}()
 
-StaticIdentityMap{T}(n::Int) where {T} =
-    (@assert n == euclideandimension(T); StaticIdentityMap{T}())
-StaticIdentityMap{T}(::Val{N}) where {N,T} =
-    (@assert N == euclideandimension(T); StaticIdentityMap{T}())
+function StaticIdentityMap{T}(n::Int) where {T}
+    n == euclideandimension(T) || throw(ArgumentError("Provided dimension of static map is inconsistent with static type"))
+    StaticIdentityMap{T}()
+end
+function StaticIdentityMap{T}(::Val{N}) where {N,T}
+    N == euclideandimension(T) || throw(ArgumentError("Provided dimension of static map is inconsistent with static type"))
+    StaticIdentityMap{T}()
+end
 
 similarmap(m::StaticIdentityMap, ::Type{T}) where {T<:StaticTypes} = StaticIdentityMap{T}()
 similarmap(m::StaticIdentityMap, ::Type{T}) where {T} =
