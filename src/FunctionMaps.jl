@@ -29,12 +29,12 @@ export composedmap
 # from generic/product.jl
 export productmap
 
-# from types/basic.jl
+# from concrete/basic.jl
 export IdentityMap,
     StaticIdentityMap, VectorIdentityMap,
     ZeroMap, UnityMap, ConstantMap,
     isconstantmap, mapconstant
-# from types/affine.jl
+# from concrete/affine
 export AffineMap, Translation, LinearMap,
     affinematrix, affinevector,
     islinearmap, isaffinemap
@@ -50,9 +50,13 @@ include("generic/jacobian.jl")
 include("generic/composite.jl")
 include("generic/product.jl")
 include("generic/isomorphism.jl")
-include("types/basic.jl")
-include("types/affine.jl")
-include("types/coordinates.jl")
-include("types/arithmetics.jl")
+include("concrete/basic.jl")
+include("concrete/affine/abstractaffine.jl")
+include("concrete/affine/linear.jl")
+include("concrete/affine/translation.jl")
+include("concrete/affine/affine.jl")
+include("concrete/affine/special.jl")
+include("concrete/coordinates.jl")
+include("concrete/arithmetics.jl")
 
 end
