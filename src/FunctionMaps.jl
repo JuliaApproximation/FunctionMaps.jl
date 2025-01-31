@@ -27,7 +27,8 @@ export canonicalmap
 # from generic/composite.jl
 export composedmap
 # from generic/product.jl
-export ProductMap, productmap
+export ProductMap, productmap,
+    factors, nfactors, factor
 
 # from concrete/basic.jl
 export IdentityMap,

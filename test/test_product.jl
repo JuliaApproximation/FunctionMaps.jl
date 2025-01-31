@@ -45,4 +45,7 @@ function test_product_map(T)
     @test pm isa VcatMap{T,6,4,(3,3),(2,2)}
     @test jacobian(pm, SA[one(T),0,0,0]) isa SMatrix{6,4,T}
     @test diffvolume(pm, SA[one(T),0,0,0]) == 24
+    @test factors(pm) == components(pm)
+    @test nfactors(pm) == ncomponents(pm)
+    @test factor(pm, 1) == component(pm, 1)
 end

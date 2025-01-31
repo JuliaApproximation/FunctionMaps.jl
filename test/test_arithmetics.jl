@@ -1,3 +1,7 @@
+using FunctionMaps:
+    interval_map,
+    bounded_interval_map
+
 @testset "map interval" begin
         @test interval_map(1.0, Inf, 2.0, Inf) == AffineMap(1.0, 1.0)
         @test interval_map(1.0, Inf, Inf, 2.0) == AffineMap(-1.0, 3.0)

@@ -7,18 +7,20 @@ isrealtype(::Type{Any}) = false
 const StaticTypes = Union{Number,<:StaticVector{N} where N,<:NTuple{N,Any} where N}
 
 "Apply the `hash` function recursively to the given arguments."
+hashrec() = zero(UInt)
 hashrec(x) = hash(x)
 hashrec(x, args...) = hash(x, hashrec(args...))
 
 # Workaround for #88, manually compute the hash of an array using all its elements
-hashrec() = zero(UInt)
-function hashrec(A::AbstractArray, args...)
+function hash_array(A)
 	h = hash(size(A))
 	for x in A
 		h = hash(x, h)
 	end
-	hash(h, hashrec(args...))
+	h
 end
+hashrec(A::AbstractArray) = hash_array(A)
+hashrec(A::AbstractArray, args...) = hash(hash_array(A), hashrec(args...))
 
 "What is the euclidean dimension of the given type (if applicable)?"
 euclideandimension(::Type{T}) where {T <: Number} = 1

@@ -1,3 +1,26 @@
+using FunctionMaps: ScalarAffineMap,
+    VectorAffineMap,
+    StaticAffineMap,
+    GenericAffineMap,
+    ScalarLinearMap,
+    VectorLinearMap,
+    StaticLinearMap,
+    GenericLinearMap,
+    ScalarTranslation,
+    VectorTranslation,
+    StaticTranslation,
+    GenericTranslation,
+    ProductMap,
+    TupleProductMap, VcatMap, VectorProductMap,
+    WrappedMap,
+    interval_map, multiply_map,
+    SumMap, sum_map,
+    composedmap, ComposedMap,
+    composite_jacobian, sum_jacobian,
+    CartToPolarMap, PolarToCartMap,
+    UnitCircleMap, AngleMap, UnitDiskMap,
+    VectorToComplex
+
 
 maps_to_test(T) = [
     IdentityMap{T}(),
@@ -58,6 +81,7 @@ issquarematrix(A::AbstractArray) = size(A,1)==size(A,2)
 function test_maps()
     @testset "generic functionality" begin
         test_generic_functionality()
+        test_canonical()
     end
 
     @testset "generic map tests" begin

@@ -1,3 +1,7 @@
+using FunctionMaps:
+    to_matrix, to_vector,
+    matrix_pinv
+
 function test_affine_maps(T)
     A = rand(T,2,2)
     @test FunctionMaps.to_matrix(Vector{T}, A) == A

@@ -1,3 +1,8 @@
+using FunctionMaps:
+    convert_domaintype, convert_codomaintype,
+    map_hash,
+    LazyInverse, jacobian!
+
 function generic_map_tests(T)
     for map in maps_to_test(T)
         @test prectype(map) == T

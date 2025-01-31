@@ -1,4 +1,3 @@
-
 """
 A product map is diagonal and acts on each of the components of x separately:
 `y = f(x)` becomes `y_i = f_i(x_i)`.
@@ -85,6 +84,8 @@ canonicalmap(m::ProductMap) = any(map(hascanonicalmap, factors(m))) ?
 	ProductMap(map(canonicalmap, factors(m))) : m
 canonicalmap(::Equal, m::ProductMap) = any(map(hasequalmap, factors(m))) ?
 	ProductMap(map(equalmap, factors(m))) : m
+canonicalmap(::Equivalent, m::ProductMap{NTuple{N,T}}) where {N,T} =
+	equivalentmap(convert(Map{SVector{N,T}}, m))
 canonicalmap(::Equivalent, m::ProductMap) = any(map(hasequivalentmap, factors(m))) ?
 	ProductMap(map(equivalentmap, factors(m))) : m
 
