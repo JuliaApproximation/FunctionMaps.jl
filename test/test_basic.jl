@@ -111,7 +111,7 @@ function test_wrapped_maps(T)
     m3 = m1 ∘ m2
     @test m3(one(T)) ≈ cos(sin(one(T)))
 
-    @test WrappedMap(cos) isa WrappedMap{Float64}
+    @test WrappedMap(cos) isa WrappedMap{Any}
     @test convert(Map, cos) isa WrappedMap
     @test convert(Map{BigFloat}, m1) isa WrappedMap{BigFloat}
 

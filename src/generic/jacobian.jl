@@ -35,7 +35,9 @@ DeterminantMap{T}(m::Map{S}) where {S,T} = DeterminantMap{T}(convert(Map{T}, m))
 
 determinantmap(m) = DeterminantMap(m)
 
-applymap(m::DeterminantMap, x) = det(supermap(m)(x))
+applymap(m::DeterminantMap, x) = det(applymap(supermap(m), x))
+
+mapsize(m::DeterminantMap) = (1,size(supermap(m),2))
 
 
 """
@@ -62,6 +64,8 @@ absmap(m) = AbsMap(m)
 
 applymap(m::AbsMap, x) = abs(supermap(m)(x))
 
+mapsize(m::AbsMap) = (1,size(supermap(m),2))
+
 
 "A lazy volume element evaluates to `diffvolume(m, x)` on the fly."
 struct LazyDiffVolume{T,M} <: SimpleLazyMap{T}
@@ -74,6 +78,8 @@ LazyDiffVolume{T}(m::Map{T}) where {T} = LazyDiffVolume{T,typeof(m)}(m)
 LazyDiffVolume{T}(m::Map{S}) where {S,T} = LazyDiffVolume{T}(convert(Map{T}, m))
 
 applymap(m::LazyDiffVolume, x) = diffvolume(supermap(m), x)
+
+mapsize(m::LazyDiffVolume) = (1, mapsize(supermap(m),2))
 
 Display.displaystencil(m::LazyDiffVolume) = ["LazyDiffVolume(", supermap(m), ")"]
 show(io::IO, mime::MIME"text/plain", m::LazyDiffVolume) = composite_show(io, mime, m)
@@ -162,7 +168,7 @@ zeromatrix(m, ::Type{T}, ::Type{U}) where {N,M,T<:StaticVector{N},U<:StaticVecto
 zeromatrix(m, ::Type{T}, ::Type{U}) where {T<:Number,M,U<:StaticVector{M}} =
 	zero(SVector{M,promote_type(T,eltype(U))})
 zeromatrix(m, ::Type{T}, ::Type{U}) where {T<:AbstractVector,U<:Number} =
-	transpose(zeros(promote_type(eltype(T),U), mapsize(m,1)))
+	transpose(zeros(promote_type(eltype(T),U), mapsize(m,2)))
 
 
 "Return a zero vector of the same size as the codomain of the map."

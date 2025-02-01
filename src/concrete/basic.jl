@@ -1,4 +1,3 @@
-
 "Supertype of identity maps."
 abstract type IdentityMap{T} <: Map{T} end
 

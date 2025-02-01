@@ -34,7 +34,7 @@ struct WrappedMap{T,M} <: DerivedMap{T}
     map ::  M
 end
 WrappedMap{T}(map) where {T} = WrappedMap{T,typeof(map)}(map)
-WrappedMap(map) = WrappedMap{Float64}(map)
+WrappedMap(map) = WrappedMap{domaintype(map)}(map)
 
 similarmap(m::WrappedMap, ::Type{T}) where {T} = WrappedMap{T}(m)
 

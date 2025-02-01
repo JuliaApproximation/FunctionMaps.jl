@@ -1,29 +1,48 @@
 using FunctionMaps:
-    to_matrix, to_vector,
+    to_matrix,
+    to_vector,
+    zeromatrix,
+    zerovector,
     matrix_pinv
 
 function test_affine_maps(T)
     A = rand(T,2,2)
-    @test FunctionMaps.to_matrix(Vector{T}, A) == A
-    @test FunctionMaps.to_matrix(T, 2) == 2
-    @test FunctionMaps.to_matrix(SVector{2,T}, 2) == SMatrix{2,2}(2,0,0,2)
-    @test FunctionMaps.to_matrix(SVector{2,T}, LinearAlgebra.I) == SMatrix{2,2}(1,0,0,1)
-    @test FunctionMaps.to_matrix(Vector{T}, 2) == UniformScaling(2)
-    @test FunctionMaps.to_matrix(Vector{T}, LinearAlgebra.I) == LinearAlgebra.I
+    @test to_matrix(Vector{T}, A) == A
+    @test to_matrix(T, 2) == 2
+    @test to_matrix(SVector{2,T}, 2) == SMatrix{2,2}(2,0,0,2)
+    @test to_matrix(SVector{2,T}, LinearAlgebra.I) == SMatrix{2,2}(1,0,0,1)
+    @test to_matrix(Vector{T}, 2) == UniformScaling(2)
+    @test to_matrix(T, LinearAlgebra.I) == one(T)
+    @test to_matrix(Vector{T}, LinearAlgebra.I) == LinearAlgebra.I
     # test fallback with nonsensical call
-    @test FunctionMaps.to_matrix(Tuple{Int}, 2) == 2
+    @test to_matrix(Tuple{Int}, 2) == 2
 
-    @test FunctionMaps.to_matrix(T, A, 2) == A
-    @test FunctionMaps.to_matrix(T, 2, 3) == 2
-    @test FunctionMaps.to_matrix(T, UniformScaling(2), 3) == 2
-    @test FunctionMaps.to_matrix(T, LinearAlgebra.I, zero(T)) isa T
-    @test FunctionMaps.to_matrix(SVector{2,T}, 2, SVector(1,1)) == SMatrix{2,2}(2,0,0,2)
-    @test FunctionMaps.to_matrix(Vector{T}, 2, [1,2]) == [2 0 ; 0 2]
+    @test to_matrix(Tuple{Int}, 2, 3) == 2
+    @test to_matrix(T, A, 2) == A
+    @test to_matrix(T, 2, 3) == 2
+    @test to_matrix(T, UniformScaling(2), 3) == 2
+    @test to_matrix(T, LinearAlgebra.I, zero(T)) isa T
+    @test to_matrix(SVector{2,T}, 2, SVector(1,1)) == SMatrix{2,2}(2,0,0,2)
+    @test to_matrix(Vector{T}, 2, [1,2]) == [2 0 ; 0 2]
 
-    @test FunctionMaps.to_vector(T, 2) == 0
-    @test FunctionMaps.to_vector(SVector{2,T}, 2) == SVector(0,0)
-    @test FunctionMaps.to_vector(Vector{T}, A) == [0,0]
-    @test FunctionMaps.to_vector(T, 2, 3) == 3
+    @test to_vector(T, 2) == 0
+    @test to_vector(SVector{2,T}, 2) == SVector(0,0)
+    @test to_vector(Vector{T}, A) == [0,0]
+    @test to_vector(T, 2, 3) == 3
+
+    @test zeromatrix(LinearMap(2.0)) == 0
+    @test zeromatrix(LinearMap([2.0])) == [0.0]
+    @test zeromatrix(LinearMap(SA[2.0])) isa SVector
+    @test zeromatrix(LinearMap(SA[2.0])) == [0.0]
+    @test zeromatrix(LinearMap(SA[2.0])) isa SVector
+    @test zeromatrix(LinearMap(SA[2 1; 1 2])) isa SMatrix{2,2}
+    @test zeromatrix(LinearMap(SA[2 1; 1 2])) == [0 0; 0 0]
+    @test zeromatrix(ConstantMap{SVector{2,Float64}}(2.0)) isa Transpose{Float64,SVector{2,Float64}}
+    @test zeromatrix(ConstantMap{SVector{2,Float64}}(2.0)) == [0 0]
+    @test zeromatrix(LinearMap{SVector{2,Int}}(transpose(SA[1, 2]))) isa Transpose{Int,SVector{2,Int}}
+    @test zeromatrix(LinearMap{SVector{2,Int}}(transpose(SA[1, 2]))) == [0 0]
+    @test zeromatrix(LinearMap(transpose([1, 2]))) isa Transpose{Int,Vector{Int}}
+    @test zeromatrix(LinearMap(transpose([1, 2]))) == [0 0]
 
     if T != BigFloat    # BigFloat's make pinv fail for StaticArrays
         @test FunctionMaps.matrix_pinv(SMatrix{2,2}(rand(T),rand(T),rand(T),rand(T))) isa SMatrix{2,2}

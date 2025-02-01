@@ -38,8 +38,8 @@ codomaintype(m) = codomaintype(m, domaintype(m))
 codomaintype(m, ::Type{T}) where {T} = _codomaintype(typeof(m), T)
 _codomaintype(::Type{M}, ::Type{T}) where {M,T} = Base.promote_op(applymap, M, T)
 _codomaintype(::Type{M}, ::Type{Any}) where {M} = Any
-_codomaintype(M::Type{<:TypedMap{T,U}}, ::Type{T}) where {T,U} = U
-_codomaintype(M::Type{<:TypedMap{T,U}}, ::Type{Any}) where {T,U} = U
+_codomaintype(::Type{<:TypedMap{T,U}}, ::Type{T}) where {T,U} = U
+_codomaintype(::Type{<:TypedMap{T,U}}, ::Type{Any}) where {T,U} = U
 
 prectype(::Type{<:Map{T}}) where T = prectype(T)
 numtype(::Type{<:Map{T}}) where T = numtype(T)

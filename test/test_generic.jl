@@ -1,7 +1,11 @@
 using FunctionMaps:
     convert_domaintype, convert_codomaintype,
     map_hash,
-    LazyInverse, jacobian!
+    LazyInverse, jacobian!,
+    determinantmap,
+    absmap,
+    promote_maps,
+    ScalarLinearMap
 
 function generic_map_tests(T)
     for map in maps_to_test(T)
@@ -134,7 +138,53 @@ function test_generic_jacobian(m)
     end
 end
 
+function test_generic_functionality_inverse()
+    m = inverse(cos)
+    @test m isa LazyInverse
+    @test inverse(m) == cos
+    @test !FunctionMaps.implements_inverse(cos)
+    @test isequalmap(inverse(cos), inverse(cos))
+    @test map_hash(m) == 0xe007467f7ac77adc
+end
+
+function test_generic_functionality_jacobian()
+    @test jacobian(cos) isa FunctionMaps.LazyJacobian
+    m_jac = jacobian(cos)
+    @test domaintype(m_jac) == Any
+    @test_throws MethodError mapsize(m_jac)
+
+    @test determinantmap(cos) isa FunctionMaps.DeterminantMap
+    @test FunctionMaps.DeterminantMap{Float64}(LinearMap(2)) isa FunctionMaps.DeterminantMap{Float64}
+    m_det = determinantmap(cos)
+    @test domaintype(m_det) == Any
+    @test m_det(4.0) == det(cos(4.0))
+
+    @test absmap(cos) isa FunctionMaps.AbsMap
+    @test FunctionMaps.AbsMap{Float64}(LinearMap(2)) isa FunctionMaps.AbsMap{Float64}
+    m_abs = absmap(cos)
+    @test domaintype(m_abs) == Any
+    @test m_abs(4.0) == abs(cos(4.0))
+
+    @test diffvolume(cos) isa FunctionMaps.LazyDiffVolume
+    @test FunctionMaps.LazyDiffVolume{Float64}(LinearMap(2)) isa FunctionMaps.LazyDiffVolume{Float64}
+    m_dvol = diffvolume(cos)
+    @test_throws MethodError applymap(m_dvol, 2.0)
+end
+
+
 function test_generic_functionality()
+    @test Map(cos) isa FunctionMaps.WrappedMap{Any}
+    @test Map{Float64}(cos) isa FunctionMaps.WrappedMap{Float64}
+
+    @test FunctionMaps.isvectorvalued_type(Float64)
+    @test FunctionMaps.isvectorvalued_type(Vector{Float64})
+    @test !FunctionMaps.isvectorvalued_type(Symbol)
+
+    @test FunctionMaps.is_scalar_to_scalar(LinearMap(2))
+    @test FunctionMaps.is_scalar_to_vector(LinearMap([2,2]))
+    @test FunctionMaps.is_vector_to_vector(LinearMap(rand(2,2)))
+    @test FunctionMaps.is_vector_to_scalar(ConstantMap{SVector{2,Float64}}(2))
+
     m = LinearMap(2)
     @test convert_domaintype(Float64, m) isa ScalarLinearMap{Float64}
     @test convert_domaintype(Complex{Float64}, m) isa ScalarLinearMap{Complex{Float64}}
@@ -147,4 +197,13 @@ function test_generic_functionality()
     m2 = LinearMap{SVector{2,Float64}}(2)
     @test convert_domaintype(SVector{2,BigFloat}, m2) isa GenericLinearMap{SVector{2, BigFloat}, BigFloat}
     @test convert_codomaintype(SVector{2,BigFloat}, m2) isa GenericLinearMap{SVector{2, BigFloat}, BigFloat}
+
+    @test promote_maps() == ()
+    @test promote_maps(cos) == cos
+    @test FunctionMaps.promotable_maps(LinearMap(2), LinearMap(2.0))
+    @test promote_maps(LinearMap(2), LinearMap(2.0)) isa Tuple{ScalarLinearMap{Float64}, ScalarLinearMap{Float64}}
+    @test promote_maps(LinearMap(2), LinearMap(2.0), LinearMap(2.0)) isa Tuple{ScalarLinearMap{Float64}, ScalarLinearMap{Float64}, ScalarLinearMap{Float64}}
+
+    test_generic_functionality_inverse()
+    test_generic_functionality_jacobian()
 end
