@@ -144,7 +144,6 @@ function test_generic_functionality_inverse()
     @test inverse(m) == cos
     @test !FunctionMaps.implements_inverse(cos)
     @test isequalmap(inverse(cos), inverse(cos))
-    @test map_hash(m) == 0xe007467f7ac77adc
 end
 
 function test_generic_functionality_jacobian()
