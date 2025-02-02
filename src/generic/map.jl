@@ -159,6 +159,28 @@ isvectorvalued_type(::Type{T}) where {T} = false
 isvectorvalued(m) =
     isvectorvalued_type(domaintype(m)) && isvectorvalued_type(codomaintype(m))
 
+"""
+    mapsize(m[, i])
+
+The size of a vectorvalued map is the size of its jacobian matrix.
+
+A map with size (3,5) maps vectors of length 5 to vectors of length 3. Its jacobian matrix
+is a 3-by-5 matrix.
+
+Optionally, similar to the `size` function, a second argument `i` can be provided. Choose `i`
+to be `1` or `2` to return only the corresponding element of the size. The dimension of the
+domain type is `mapsize(m, 2)`, while that of the codomain type is `mapsize(m, 1)`.
+
+If a map is scalar valued, its `mapsize` equals `()`. This reflects the convention in Julia that
+the size of a number is an empty tuple: `size(5) == ()`. If a map is scalar-to-vector, its `mapsize`
+is the tuple `(m,)` of length one. In this case the jacobian is a vector with size `(m,)`. If a map
+is vector-to-scalar, its `mapsize` is `(1,n)`.
+
+Thus, in all cases of scalarvalued and vectorvalued maps, the `mapsize` of a map agrees with the
+size of the Jacobian matrix.
+"""
+function mapsize end
+
 # mapsize should be defined for vector valued maps
 # The size of a map equals the size of its jacobian
 # The jacobian can be a number, a vector, an adjoint vector, or a matrix

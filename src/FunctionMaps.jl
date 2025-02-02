@@ -12,6 +12,9 @@ import CompositeTypes: component, components
 
 # Exhaustive list of exports:
 
+# from CompositeTypes
+export component, components, ncomponents
+
 # from util/common.jl
 export prectype, numtype
 

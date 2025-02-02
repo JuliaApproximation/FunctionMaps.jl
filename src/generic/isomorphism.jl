@@ -34,6 +34,11 @@ See also: [`VectorToNumber`](@ref).
 """
 NumberToVector() = NumberToVector{Float64}()
 
+similarmap(::NumberToVector, ::Type{T}) where {T<:Number} = NumberToVector{T}()
+similarmap(::VectorToNumber, ::Type{SVector{1,T}}) where {T<:Number} = VectorToNumber{T}()
+isequalmap(::NumberToVector, ::NumberToVector) = true
+isequalmap(::VectorToNumber, ::VectorToNumber) = true
+
 mapsize(::VectorToNumber) = (1,1)
 mapsize(::NumberToVector) = (1,)
 
@@ -77,6 +82,11 @@ See also: [`VectorToComplex`](@ref).
 """
 ComplexToVector() = ComplexToVector{Float64}()
 
+similarmap(::ComplexToVector, ::Type{Complex{T}}) where {T<:Number} = ComplexToVector{T}()
+similarmap(::VectorToComplex, ::Type{SVector{2,T}}) where {T<:Number} = VectorToComplex{T}()
+isequalmap(::ComplexToVector, ::ComplexToVector) = true
+isequalmap(::VectorToComplex, ::VectorToComplex) = true
+
 mapsize(::VectorToComplex) = (1,2)
 mapsize(::ComplexToVector) = (2,)
 
@@ -114,6 +124,12 @@ end
 "Map a flattened vector to a nested one."
 struct FlatToNested{N,T,U,DIM} <: Isomorphism{SVector{N,T},U}
 end
+
+# TODO: not all type combinations make sense
+similarmap(::NestedToFlat{N,T,U,DIM}, ::Type{V}) where {N,T,U,DIM,V} = NestedToFlat{N,T,V,DIM}()
+similarmap(::FlatToNested{N,T,U,DIM}, ::Type{SVector{N,V}}) where {N,T,U,DIM,V<:Number} = FlatToNested{N,V,U,DIM}()
+isequalmap(::NestedToFlat{N,T,U,DIM}, ::NestedToFlat{N,S,V,DIM}) where {N,T,U,DIM,S,V} = true
+isequalmap(::FlatToNested{N,T,U,DIM}, ::FlatToNested{N,S,V,DIM}) where {N,T,U,DIM,S,V} = true
 
 inverse(::NestedToFlat{N,T,U,DIM}) where {N,T,U,DIM} = FlatToNested{N,T,U,DIM}()
 inverse(::FlatToNested{N,T,U,DIM}) where {N,T,U,DIM} = NestedToFlat{N,T,U,DIM}()

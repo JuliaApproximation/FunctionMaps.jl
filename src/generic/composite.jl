@@ -1,16 +1,41 @@
+# ensure that the domaintype of each map in the sequence agrees with the codomain type of the
+# preceding map
+function match_domain_codomain_types(::Type{T}, map, maps...) where {T}
+    Y = promote_type(T, domaintype(map))
+    m1 = convert_domaintype(Y, map)
+    (m1, match_domain_codomain_types(codomaintype(m1), maps...)...)
+end
 
-"The composition of several maps."
+match_domain_codomain_types(::Type{T}, map) where {T} = (convert_domaintype(T, map),)
+
+"""
+    ComposedMap{T,MAPS}
+
+The composition of several maps.
+
+The `components` of a `ComposedMap` are the maps in the order that they are applied
+to the input.
+"""
 struct ComposedMap{T,MAPS} <: CompositeLazyMap{T}
     maps    ::  MAPS
 end
 
-ComposedMap(maps...) = ComposedMap{domaintype(maps[1])}(maps...)
-ComposedMap{T}(maps...) where {T} = ComposedMap{T,typeof(maps)}(maps)
+function ComposedMap(map1, maps...)
+    P = prectype(map1, maps...)
+    if P == Any
+        # don't try to promote types
+        _ComposedMap(domaintype(map1), map1, maps...)
+    else
+        T = to_prectype(P, domaintype(map1))
+        _ComposedMap(T, match_domain_codomain_types(T, map1, maps...)...)
+    end
+end
+ComposedMap{T}(map1, maps...) where {T} = _ComposedMap(T, match_domain_codomain_types(T, map1, maps...)...)
+_ComposedMap(::Type{T}, maps...) where {T} = ComposedMap{T,typeof(maps)}(maps)
 
-# TODO: make proper conversion
-similarmap(m::ComposedMap, ::Type{T}) where {T} = ComposedMap{T}(m.maps...)
+similarmap(m::ComposedMap, ::Type{T}) where {T} = ComposedMap{T}(components(m)...)
 
-codomaintype(m::ComposedMap) = codomaintype(m.maps[end])
+codomaintype(m::ComposedMap) = codomaintype(last(m.maps))
 
 # Maps are applied in the order that they appear in m.maps
 applymap(m::ComposedMap, x) = applymap_rec(x, m.maps...)
@@ -19,7 +44,7 @@ applymap_rec(x, map1, maps...) = applymap_rec(applymap(map1, x), maps...)
 
 # The size of a composite map depends on the first and the last map to be applied
 # We check whether they are scalar_to_vector, vector_to_vector, etcetera
-mapsize(m::ComposedMap) = _composed_mapsize(m, m.maps[end], m.maps[1], mapsize(m.maps[end]), mapsize(m.maps[1]))
+mapsize(m::ComposedMap) = _composed_mapsize(m, last(m.maps), first(m.maps), mapsize(last(m.maps)), mapsize(first(m.maps)))
 _composed_mapsize(m, m_end, m1, S_end::Tuple{Int,Int}, S1::Tuple{Int,Int}) = (S_end[1],S1[2])
 _composed_mapsize(m, m_end, m1, S_end::Tuple{Int,Int}, S1::Tuple{Int}) =
     is_vector_to_scalar(m_end) ? () : (S_end[1],)
@@ -109,9 +134,10 @@ struct MulMap{T,MAPS} <: CompositeLazyMap{T}
     maps    ::  MAPS
 end
 
+MulMap(map1::Map, maps::Map...) = MulMap(promote_maps(map1, maps...)...)
 MulMap(map1::Map{T}, maps::Map{T}...) where {T} = MulMap{T}(map1, maps...)
 MulMap{T}(maps::Map{T}...) where {T} = MulMap{T,typeof(maps)}(maps)
-MulMap{T}(maps...) where {T} = _mulmap(T, convert.(Map{T}, maps)...)
+MulMap{T}(maps...) where {T} = _mulmap(T, convert_domaintype.(Ref(T), maps)...)
 _mulmap(::Type{T}, maps...) where {T} = MulMap{T,typeof(maps)}(maps)
 
 similarmap(m::MulMap, ::Type{T}) where {T} = MulMap{T}(m.maps...)
@@ -155,9 +181,10 @@ struct SumMap{T,MAPS} <: CompositeLazyMap{T}
     maps    ::  MAPS
 end
 
+SumMap(map1::Map, maps::Map...) = SumMap(promote_maps(map1, maps...)...)
 SumMap(map1::Map{T}, maps::Map{T}...) where {T} = SumMap{T}(map1, maps...)
 SumMap{T}(maps::Map{T}...) where {T} = SumMap{T,typeof(maps)}(maps)
-SumMap{T}(maps...) where {T} = _summap(T, convert.(Map{T}, maps)...)
+SumMap{T}(maps...) where {T} = _summap(T, convert_domaintype.(Ref(T), maps)...)
 _summap(::Type{T}, maps...) where {T} = SumMap{T,typeof(maps)}(maps)
 
 similarmap(m::SumMap, ::Type{T}) where {T} = SumMap{T}(m.maps...)

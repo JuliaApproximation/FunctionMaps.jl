@@ -43,7 +43,6 @@ maps_to_test(T) = [
     Translation(randvec(T, 3)),
     LinearMap(randvec(T, 2, 2)),
     LinearMap(randvec(T, 2)),
-    LinearMap(randvec(T, 2, 2)) ∘ AffineMap(T(1.2), randvec(T, 2)),
     AffineMap(5.0, 2.0) ∘ VectorToComplex{T}() ∘ UnitCircleMap{T}(),
     LinearMap(SMatrix{2,2}(1,2,3,T(4))) ∘ CartToPolarMap{T}() ∘ LinearMap(SMatrix{2,2}(1,2,3,T(4))),
     # Interval{Any}(0.0, 1.0)
@@ -103,8 +102,7 @@ function test_maps()
         test_affine_maps(BigFloat)
     end
     @testset "composite maps" begin
-        test_composite_map(Float64)
-        test_composite_map(BigFloat)
+        test_composite_maps()
     end
     @testset "product maps" begin
         test_product_map(Float64)
@@ -125,68 +123,6 @@ function test_maps()
     @testset "Mixed maps" begin
         test_mixed_maps()
     end
-end
-
-function test_composite_map(T)
-    a = T(0)
-    b = T(1)
-    c = T(2)
-    d = T(3)
-    ma = IdentityMap{T}()
-    mb = interval_map(a, b, c, d)
-
-    r = suitable_point_to_map(ma)
-    m1 = ma∘mb
-    test_generic_map(m1)
-    @test m1(r) ≈ ma(mb(r))
-    m2 = m1∘mb
-    test_generic_map(m2)
-    @test m2(r) ≈ m1(mb(r))
-    m3 = mb∘m2
-    test_generic_map(m3)
-    @test m3(r) ≈ mb(m2(r))
-    m = m2∘m3
-    test_generic_map(m)
-    @test m(r) ≈ m2(m3(r))
-
-    m5 = ComposedMap(LinearMap(rand(T,2,2)), AffineMap(rand(T,2,2),rand(T,2)))
-    test_generic_map(m5)
-    @test jacobian(m5) isa ConstantMap
-    @test m5[Component(1)] isa LinearMap
-    @test m5[Component(2)] isa AffineMap
-    @test ComposedMap(m5[Component(1:2)]...) == m5
-    @test_throws BoundsError m5[Component(3)]
-
-    m6 = multiply_map(ma,ma)
-    @test m6(one(T)/2) == one(T)/4
-    @test jacobian(m6) isa SumMap
-    @test jacobian(m6)(one(T)) == 2
-    @test jacobian(m6, one(T)) == 2
-
-    m7 = sum_map(ma,ma)
-    @test m7(one(T)) == 2
-    @test jacobian(m7) isa ConstantMap
-    @test jacobian(m7, one(T)) == 2
-
-    @test mapsize(ComposedMap(LinearMap(2),LinearMap(rand(T,2)),LinearMap(rand(T,2,2)))) == (2,)
-    @test mapsize(ComposedMap(LinearMap(rand(T,2)),LinearMap(rand(T,2)'),LinearMap(rand(T,2)))) == (2,)
-    @test mapsize(ComposedMap(LinearMap(rand(T,2,2)),LinearMap(rand(T,2)'),LinearMap(2))) == (1,2)
-    @test mapsize(ComposedMap(LinearMap(one(T)),LinearMap(one(T)))) == ()
-
-    @test composedmap() == ()
-    @test composedmap(ma) == ma
-    @test composedmap(ma,ma) == ma
-    @test composedmap(ma,ma,ma) == ma
-
-    @test composite_jacobian(ma) == jacobian(ma)
-
-    @test multiply_map() == ()
-    @test multiply_map(ma) == ma
-    @test multiply_map(ma,ma)(2*one(T)) == 4
-    @test multiply_map(ma,ma,ma)(2*one(T)) == 8
-
-    @test sum_jacobian() == ()
-    @test sum_jacobian(ma) == jacobian(ma)
 end
 
 function test_mixed_maps()

@@ -1,11 +1,15 @@
 using FunctionMaps:
-    convert_domaintype, convert_codomaintype,
+    convert_domaintype,
+    convert_codomaintype,
+    convert_numtype,
+    convert_prectype,
     map_hash,
     LazyInverse, jacobian!,
     determinantmap,
     absmap,
     promote_maps,
-    ScalarLinearMap
+    ScalarLinearMap,
+    TypedMap
 
 function generic_map_tests(T)
     for map in maps_to_test(T)
@@ -184,6 +188,14 @@ function test_generic_functionality()
     @test FunctionMaps.is_vector_to_vector(LinearMap(rand(2,2)))
     @test FunctionMaps.is_vector_to_scalar(ConstantMap{SVector{2,Float64}}(2))
 
+    m_typed = ConstantMap(2)  # instance of subype of TypedMap
+    @test domaintype(m_typed) == Int
+    @test codomaintype(m_typed) == Int
+    @test codomaintype(m_typed, Int) == Int
+    @test codomaintype(m_typed, Any) == Int
+    @test convert(TypedMap{Float64,Int}, m_typed) isa TypedMap{Float64,Int}
+    @test convert(TypedMap{Int,Int}, m_typed) === m_typed
+
     m = LinearMap(2)
     @test convert_domaintype(Float64, m) isa ScalarLinearMap{Float64}
     @test convert_domaintype(Complex{Float64}, m) isa ScalarLinearMap{Complex{Float64}}
@@ -192,16 +204,40 @@ function test_generic_functionality()
     @test convert_codomaintype(Float64, m) isa ScalarLinearMap{Float64}
     @test convert_codomaintype(Complex{Float64}, m) isa ScalarLinearMap{Complex{Float64}}
     @test_throws ArgumentError convert_codomaintype(SVector{2,BigFloat}, m)
+    @test convert_domaintype(Any, cos) == cos
+    @test domaintype(convert_domaintype(Float64, cos)) == Float64
+    @test mapsize(m) == ()
+    @test mapsize(m, 1) == 1
+    @test mapsize(m, 2) == 1
 
     m2 = LinearMap{SVector{2,Float64}}(2)
     @test convert_domaintype(SVector{2,BigFloat}, m2) isa GenericLinearMap{SVector{2, BigFloat}, BigFloat}
     @test convert_codomaintype(SVector{2,BigFloat}, m2) isa GenericLinearMap{SVector{2, BigFloat}, BigFloat}
+    @test mapsize(m2) == (2,2)
+    @test mapsize(m2, 1) == 2
+    @test mapsize(m2, 2) == 2
+
+    m3 = LinearMap([1,2,3])
+    @test mapsize(m3) == (3,)
+    @test mapsize(m3, 1) == 3
+    @test mapsize(m3, 2) == 1
+
+    @test numtype(convert_numtype(Float64, LinearMap(2))) == Float64
+    @test prectype(convert_prectype(Float64, LinearMap(2+im))) == Float64
+
+    @test FunctionMaps.promote_map_point_pair(cos, 2) == (cos, 2)
 
     @test promote_maps() == ()
     @test promote_maps(cos) == cos
     @test FunctionMaps.promotable_maps(LinearMap(2), LinearMap(2.0))
     @test promote_maps(LinearMap(2), LinearMap(2.0)) isa Tuple{ScalarLinearMap{Float64}, ScalarLinearMap{Float64}}
     @test promote_maps(LinearMap(2), LinearMap(2.0), LinearMap(2.0)) isa Tuple{ScalarLinearMap{Float64}, ScalarLinearMap{Float64}, ScalarLinearMap{Float64}}
+
+    A = LinearMap(rand(2,2))
+    x = rand(2)
+    y = zeros(2)
+    @test FunctionMaps.applymap!(y, A, x) == A(x)
+    @test y == A(x)
 
     test_generic_functionality_inverse()
     test_generic_functionality_jacobian()

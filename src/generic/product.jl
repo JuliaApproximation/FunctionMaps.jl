@@ -114,8 +114,6 @@ function VcatMap{T}(maps...) where T
 	VcatMap{T,M,N}(maps...)
 end
 
-mapdim(map) = mapsize(map,2)
-
 VcatMap{T,M,N}(maps::Union{Tuple,Vector}) where {T,M,N} = VcatMap{T,M,N}(maps...)
 function VcatMap{T,M,N}(maps...) where {T,M,N}
 	DIM1 = map(t->mapsize(t,1), maps)

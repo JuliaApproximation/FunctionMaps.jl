@@ -1,6 +1,12 @@
+using FunctionMaps:
+    VcatMap,
+    VectorProductMap,
+    TupleProductMap
+
 function test_product_map(T)
     ma = IdentityMap{T}()
     mb = interval_map(T(0), T(1), T(2), T(3))
+    mc = interval_map(T(2), T(3), T(4), T(5))
 
     r1 = suitable_point_to_map(ma)
     r2 = suitable_point_to_map(ma)
@@ -10,7 +16,15 @@ function test_product_map(T)
 
     m1 = productmap(ma,mb)
     test_generic_map(m1)
+    @test isaffinemap(m1)
+    @test !islinearmap(m1)
+    @test !isconstantmap(m1)
     @test m1(SVector(r1,r2)) ≈ SVector(ma(r1),mb(r2))
+    @test mapsize(m1) == (2,2)
+    @test !hascanonicalmap(m1)
+    @test !hasequalmap(m1)
+    @test !hasequivalentmap(m1)
+
     m2 = productmap(m1,mb)
     test_generic_map(m2)
     @test m2(SVector(r1,r2,r3)) ≈ SVector(ma(r1),mb(r2),mb(r3))
@@ -37,15 +51,33 @@ function test_product_map(T)
     @test convert(Map{SVector{2,T}}, m6) isa VcatMap
     test_generic_map(m6)
 
+    @test FunctionMaps.compatibleproductdims(m1, m6)
+    @test composedmap(m1, m6) isa ProductMap
+    @test !FunctionMaps.compatibleproductdims(m2, m5)
+    @test composedmap(m2, m5) isa ComposedMap
+
+    @test ProductMap(SA[mb,mc]) isa VcatMap
+    @test ProductMap{Tuple{T,T}}(mb, mc) isa TupleProductMap
+
     @test components(productmap(LinearMap(1), LinearMap(one(T)))) isa Tuple{<:Map{T},<:Map{T}}
 
     # test a non-rectangular product map
     m_rect = AffineMap(SA[one(T) 2; 3 4; 5 6], SA[one(T),one(T),zero(T)])
     pm = productmap(m_rect, m_rect)
     @test pm isa VcatMap{T,6,4,(3,3),(2,2)}
+    @test isaffinemap(pm)
     @test jacobian(pm, SA[one(T),0,0,0]) isa SMatrix{6,4,T}
     @test diffvolume(pm, SA[one(T),0,0,0]) == 24
     @test factors(pm) == components(pm)
     @test nfactors(pm) == ncomponents(pm)
     @test factor(pm, 1) == component(pm, 1)
+
+    @test mapconstant(productmap(ConstantMap(2), ConstantMap(4))) == [2,4]
+
+    @test VcatMap([ma,mb]) isa VcatMap
+    @test VcatMap{T,2,2}([ma,mb]) isa VcatMap{T,2,2}
+    @test VectorProductMap([ma,mb]) isa VectorProductMap
+    @test VectorProductMap{Vector{Float64}}([ma,mb]) isa VectorProductMap{Vector{Float64}}
+    @test TupleProductMap((ma,mb)) isa TupleProductMap
+    @test TupleProductMap{Tuple{T,T}}((ma,mb)) isa TupleProductMap{Tuple{T,T}}
 end

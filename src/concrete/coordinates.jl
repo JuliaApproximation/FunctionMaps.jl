@@ -1,4 +1,3 @@
-
 # This file contains a few specific maps, included mainly to test
 # functionality on non-trivial maps
 
@@ -11,6 +10,9 @@ struct CartToPolarMap{T} <: Map{SVector{2,T}}
 end
 
 CartToPolarMap() = CartToPolarMap{Float64}()
+
+similarmap(::CartToPolarMap, ::Type{SVector{2,T}}) where {T<:Number} = CartToPolarMap{T}()
+isequalmap(m1::CartToPolarMap, m2::CartToPolarMap) = true
 
 mapsize(m::CartToPolarMap) = (2,2)
 
@@ -28,10 +30,6 @@ inverse(m::CartToPolarMap, x) = inverse(m)(x)
 
 isrealmap(m::CartToPolarMap) = true
 
-convert(::Type{Map{SVector{2,T}}}, ::CartToPolarMap) where {T} = CartToPolarMap{T}()
-
-isequalmap(m1::CartToPolarMap, m2::CartToPolarMap) = true
-
 
 """
 A Polar to Cartesian map. The angle is mapped to the second dimension,
@@ -42,6 +40,9 @@ struct PolarToCartMap{T} <: Map{SVector{2,T}}
 end
 
 PolarToCartMap() = PolarToCartMap{Float64}()
+
+similarmap(::PolarToCartMap, ::Type{SVector{2,T}}) where {T<:Number} = PolarToCartMap{T}()
+isequalmap(m1::PolarToCartMap, m2::PolarToCartMap) = true
 
 mapsize(m::PolarToCartMap) = (2,2)
 
@@ -55,10 +56,6 @@ inverse(m::PolarToCartMap, x) = inverse(m)(x)
 
 isrealmap(m::PolarToCartMap) = true
 
-convert(::Type{Map{SVector{2,T}}}, ::PolarToCartMap) where {T} = PolarToCartMap{T}()
-
-isequalmap(m1::PolarToCartMap, m2::PolarToCartMap) = true
-
 
 """
 The map `[cos(2πt), sin(2πt)]` from `[0,1]` to the unit circle in `ℝ^2`.
@@ -66,6 +63,9 @@ The map `[cos(2πt), sin(2πt)]` from `[0,1]` to the unit circle in `ℝ^2`.
 struct UnitCircleMap{T} <: Map{T} end
 
 UnitCircleMap() = UnitCircleMap{Float64}()
+
+similarmap(::UnitCircleMap, ::Type{T}) where {T<:Number} = UnitCircleMap{T}()
+isequalmap(::UnitCircleMap, ::UnitCircleMap) = true
 
 mapsize(m::UnitCircleMap) = (2,)
 
@@ -88,6 +88,9 @@ struct AngleMap{T} <: Map{SVector{2,T}}
 end
 
 AngleMap() = AngleMap{Float64}()
+
+similarmap(::AngleMap, ::Type{SVector{2,T}}) where {T<:Number} = AngleMap{T}()
+isequalmap(::AngleMap, ::AngleMap) = true
 
 function applymap(m::AngleMap{T}, x) where {T}
     twopi = 2*convert(T, pi)
@@ -123,6 +126,9 @@ The map `r*[cos(2πt), sin(2πt)]` from `[0,1]^2` to the unit disk in `ℝ^2`.
 struct UnitDiskMap{T} <: Map{SVector{2,T}} end
 
 UnitDiskMap() = UnitDiskMap{Float64}()
+
+similarmap(::UnitDiskMap, ::Type{SVector{2,T}}) where {T<:Number} = UnitDiskMap{T}()
+isequalmap(::UnitDiskMap, ::UnitDiskMap) = true
 
 mapsize(m::UnitDiskMap) = (2,2)
 

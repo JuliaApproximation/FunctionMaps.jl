@@ -1,10 +1,12 @@
-
 "A lazy Jacobian `J` stores a map `m` and returns `J(x) = jacobian(m, x)`."
 struct LazyJacobian{T,M} <: SimpleLazyMap{T}
 	map	::	M
 end
 
-LazyJacobian(m) = LazyJacobian{domaintype(m),typeof(m)}(m)
+LazyJacobian(m) = LazyJacobian{domaintype(m)}(m)
+LazyJacobian{T}(m) where T = _LazyJacobian(T, convert_domaintype(T, m))
+_LazyJacobian(::Type{T}, m) where T = LazyJacobian{T,typeof(m)}(m)
+
 applymap(m::LazyJacobian, x) = jacobian(supermap(m), x)
 
 mapsize(m::LazyJacobian) = mapsize(supermap(m))
@@ -29,9 +31,8 @@ struct DeterminantMap{T,M} <: SimpleLazyMap{T}
 end
 
 DeterminantMap(m) = DeterminantMap{domaintype(m)}(m)
-DeterminantMap{T}(m) where {T} = DeterminantMap{T,typeof(m)}(m)
-DeterminantMap{T}(m::Map{T}) where {T} = DeterminantMap{T,typeof(m)}(m)
-DeterminantMap{T}(m::Map{S}) where {S,T} = DeterminantMap{T}(convert(Map{T}, m))
+DeterminantMap{T}(m) where T = _DeterminantMap(T, convert_domaintype(T, m))
+_DeterminantMap(::Type{T}, m) where T = DeterminantMap{T,typeof(m)}(m)
 
 determinantmap(m) = DeterminantMap(m)
 
@@ -56,9 +57,8 @@ struct AbsMap{T,M} <: SimpleLazyMap{T}
 end
 
 AbsMap(m) = AbsMap{domaintype(m)}(m)
-AbsMap{T}(m) where {T} = AbsMap{T,typeof(m)}(m)
-AbsMap{T}(m::Map{T}) where {T} = AbsMap{T,typeof(m)}(m)
-AbsMap{T}(m::Map{S}) where {S,T} = AbsMap{T}(convert(Map{T}, m))
+AbsMap{T}(m) where T = _AbsMap(T, convert_domaintype(T, m))
+_AbsMap(::Type{T}, m) where T = AbsMap{T,typeof(m)}(m)
 
 absmap(m) = AbsMap(m)
 
@@ -73,9 +73,8 @@ struct LazyDiffVolume{T,M} <: SimpleLazyMap{T}
 end
 
 LazyDiffVolume(m) = LazyDiffVolume{domaintype(m)}(m)
-LazyDiffVolume{T}(m) where {T} = LazyDiffVolume{T,typeof(m)}(m)
-LazyDiffVolume{T}(m::Map{T}) where {T} = LazyDiffVolume{T,typeof(m)}(m)
-LazyDiffVolume{T}(m::Map{S}) where {S,T} = LazyDiffVolume{T}(convert(Map{T}, m))
+LazyDiffVolume{T}(m) where T = _LazyDiffVolume(T, convert_domaintype(T, m))
+_LazyDiffVolume(::Type{T}, m) where T = LazyDiffVolume{T,typeof(m)}(m)
 
 applymap(m::LazyDiffVolume, x) = diffvolume(supermap(m), x)
 

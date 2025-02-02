@@ -15,5 +15,7 @@ include("test_basic.jl")
 include("test_affine.jl")
 include("test_canonical.jl")
 include("test_product.jl")
+include("test_composite.jl")
+
 include("test_maps.jl")
 include("test_arithmetics.jl")
