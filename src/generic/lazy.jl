@@ -24,7 +24,7 @@ isrealmap(m::CompositeLazyMap) = all(map(isrealmap, components(m)))
 abstract type DerivedMap{T} <: SimpleLazyMap{T} end
 
 applymap(m::DerivedMap, x) = supermap(m)(x)
-appymap!(y, m::DerivedMap, x) = applymap!(y, supermap(m), x)
+applymap!(y, m::DerivedMap, x) = applymap!(y, supermap(m), x)
 
 jacobian(m::DerivedMap) = jacobian(supermap(m))
 
